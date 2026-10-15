@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 232">
+  <defs>
+    <linearGradient id="blue" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#36a2ff"/>
+      <stop offset="1" stop-color="#0a7cff"/>
+    </linearGradient>
+  </defs>
+  <path d="M110 16H390A100 100 0 0 1 490 116C490 160 494 190 512 214C486 217 462 210 446 199C430 210 411 216 390 216H110A100 100 0 0 1 110 16Z" fill="url(#blue)"/>
+  <text x="250" y="117" text-anchor="middle" dominant-baseline="central" font-family="-apple-system, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="104" font-weight="500" letter-spacing="-2" fill="#fff">gurt:yo</text>
+</svg>

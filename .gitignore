@@ -1,0 +1,25 @@
+# secrets: commit .env.example instead
+.env
+.env.local
+
+# python
+.venv/
+venv/
+__pycache__/
+*.pyc
+celerybeat-schedule*
+
+# node / build output
+node_modules/
+dist/
+
+# local data and tooling
+backend/.showcase_ids.json
+demo/output/
+.claude/settings.local.json
+
+# os / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

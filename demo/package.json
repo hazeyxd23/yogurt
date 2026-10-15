@@ -1,0 +1,16 @@
+{
+  "name": "productivity-analytics-demo",
+  "private": true,
+  "type": "module",
+  "description": "Records and edits the yogurt showcase video (Playwright drives Edge, ffmpeg encodes, the music is synthesised).",
+  "scripts": {
+    "capture": "node capture.mjs",
+    "compose": "node compose.mjs",
+    "video": "node capture.mjs && node compose.mjs",
+    "record": "node record.mjs"
+  },
+  "devDependencies": {
+    "ffmpeg-static": "^5.3.0",
+    "playwright-core": "^1.64.1"
+  }
+}
