@@ -11,7 +11,7 @@ from app.utils.migrations import ensure_columns
 from app.routes import analytics, guitar, integrations, leetcode, notes, notifications, reading, tasks
 
 DEFAULT_USER_ID = 1
-DEFAULT_USER_EMAIL = "bhavyaclasher@gmail.com"
+DEFAULT_USER_EMAIL = "user@example.com"
 DEFAULT_USERNAME = "bhavya"
 
 app = FastAPI(title="Productivity Analytics API", version="0.2.0")
