@@ -14,7 +14,7 @@ node_modules/
 dist/
 
 # local data and tooling
-backend/.showcase_ids.json
+backend/scripts/.showcase_ids.json
 demo/output/
 .claude/settings.local.json
 
