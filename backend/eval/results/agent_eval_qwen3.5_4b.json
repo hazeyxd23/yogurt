@@ -1,0 +1,338 @@
+{
+  "summary": {
+    "model": "ollama:qwen3.5:4b",
+    "date": "2026-10-16",
+    "questions": 18,
+    "correct": 18,
+    "answerable_correct": "15/15",
+    "declines_correct": "3/3",
+    "first_try": "15/15",
+    "self_corrected": "0/15",
+    "avg_seconds": 10.1
+  },
+  "questions": [
+    {
+      "id": "a01",
+      "question": "What was my longest guitar session in minutes?",
+      "correct": true,
+      "expected": [
+        [
+          "25"
+        ]
+      ],
+      "answer": "Your longest guitar session lasted 25 minutes.",
+      "sql": "SELECT MAX(duration_minutes) AS longest_session_minutes\nFROM guitar_sessions",
+      "rows": [
+        [
+          25
+        ]
+      ],
+      "failed_attempts": 0,
+      "seconds": 9.5
+    },
+    {
+      "id": "a02",
+      "question": "What's my average guitar session length?",
+      "correct": true,
+      "expected": [
+        [
+          "7"
+        ]
+      ],
+      "answer": "Your average guitar session length is 7 minutes.",
+      "sql": "SELECT ROUND(AVG(duration_minutes)::numeric, 1) AS avg_duration_minutes\nFROM guitar_sessions",
+      "rows": [
+        [
+          7.0
+        ]
+      ],
+      "failed_attempts": 0,
+      "seconds": 9.9
+    },
+    {
+      "id": "a03",
+      "question": "How many books am I currently reading?",
+      "correct": true,
+      "expected": [
+        [
+          "3"
+        ]
+      ],
+      "answer": "You are currently reading 3 books.",
+      "sql": "SELECT COUNT(*) AS books_reading\nFROM books\nWHERE status = 'reading'",
+      "rows": [
+        [
+          3
+        ]
+      ],
+      "failed_attempts": 0,
+      "seconds": 9.6
+    },
+    {
+      "id": "a04",
+      "question": "Which book have I spent the most time reading?",
+      "correct": true,
+      "expected": [
+        [
+          "atomic habits"
+        ]
+      ],
+      "answer": "You have spent the most time reading Atomic Habits, with a total of 15 minutes.",
+      "sql": "SELECT b.title, SUM(rs.duration_minutes) AS total_reading_time\nFROM books b\nJOIN reading_sessions rs ON b.id = rs.book_id\nGROUP BY b.id, b.title\nORDER BY total_reading_time DESC\nLIMIT 1",
+      "rows": [
+        [
+          "Atomic Habits",
+          15
+        ]
+      ],
+      "failed_attempts": 0,
+      "seconds": 12.1
+    },
+    {
+      "id": "a05",
+      "question": "How many pages have I read in total?",
+      "correct": true,
+      "expected": [
+        [
+          "669"
+        ]
+      ],
+      "answer": "You have read a total of 669 pages.",
+      "sql": "SELECT SUM(pages_read) AS total_pages\nFROM reading_sessions",
+      "rows": [
+        [
+          669
+        ]
+      ],
+      "failed_attempts": 0,
+      "seconds": 9.7
+    },
+    {
+      "id": "a06",
+      "question": "How many LeetCode problems have I solved?",
+      "correct": true,
+      "expected": [
+        [
+          "40"
+        ]
+      ],
+      "answer": "You have solved 40 LeetCode problems.",
+      "sql": "SELECT COUNT(*) AS solved_count\nFROM leetcode_problems\nWHERE solved = true",
+      "rows": [
+        [
+          40
+        ]
+      ],
+      "failed_attempts": 0,
+      "seconds": 9.8
+    },
+    {
+      "id": "a07",
+      "question": "How many Hard LeetCode problems are still unsolved?",
+      "correct": true,
+      "expected": [
+        [
+          "5"
+        ]
+      ],
+      "answer": "You have 5 unsolved Hard LeetCode problems.",
+      "sql": "SELECT COUNT(*) AS unsolved_hard_problems\nFROM leetcode_problems\nWHERE difficulty = 'Hard'\n  AND solved = false",
+      "rows": [
+        [
+          5
+        ]
+      ],
+      "failed_attempts": 0,
+      "seconds": 10.6
+    },
+    {
+      "id": "a08",
+      "question": "How many LeetCode problems did I solve in September 2026?",
+      "correct": true,
+      "expected": [
+        [
+          "25"
+        ]
+      ],
+      "answer": "You solved 25 LeetCode problems in September 2026.",
+      "sql": "SELECT COUNT(*) AS solved_count\nFROM leetcode_problems\nWHERE solved_date >= '2026-09-01'\n  AND solved_date < '2026-10-01'\n  AND solved = true",
+      "rows": [
+        [
+          25
+        ]
+      ],
+      "failed_attempts": 0,
+      "seconds": 12.9
+    },
+    {
+      "id": "a09",
+      "question": "How many tasks did I complete last month?",
+      "correct": true,
+      "expected": [
+        [
+          "41"
+        ]
+      ],
+      "answer": "You completed 41 tasks last month.",
+      "sql": "SELECT COUNT(*) AS completed_tasks\nFROM tasks\nWHERE task_date >= date_trunc('month', CURRENT_DATE - INTERVAL '1 month') + INTERVAL '1 day'\n  AND task_date < date_trunc('month', CURRENT_DATE)\n  AND completed = true",
+      "rows": [
+        [
+          41
+        ]
+      ],
+      "failed_attempts": 0,
+      "seconds": 11.9
+    },
+    {
+      "id": "a10",
+      "question": "How many high-priority tasks do I have this week?",
+      "correct": true,
+      "expected": [
+        [
+          "11"
+        ]
+      ],
+      "answer": "You have 11 high-priority tasks this week.",
+      "sql": "SELECT COUNT(*) AS high_priority_tasks\nFROM tasks\nWHERE priority = 1\n  AND task_date >= date_trunc('week', CURRENT_DATE)\n  AND task_date < date_trunc('week', CURRENT_DATE) + INTERVAL '7 days'",
+      "rows": [
+        [
+          11
+        ]
+      ],
+      "failed_attempts": 0,
+      "seconds": 12.0
+    },
+    {
+      "id": "a11",
+      "question": "On which day did I practise guitar the most?",
+      "correct": true,
+      "expected": [
+        [
+          "2026-09-12"
+        ]
+      ],
+      "answer": "You practiced guitar the most on September 12, 2026, with a total of 27 minutes across 3 sessions.",
+      "sql": "SELECT date_trunc('day', created_at) AS practice_day,\n       COUNT(*) AS sessions,\n       SUM(duration_minutes) AS total_minutes\nFROM guitar_sessions\nGROUP BY date_trunc('day', created_at)\nORDER BY total_minutes DESC\nLIMIT 1",
+      "rows": [
+        [
+          "2026-09-12T00:00:00",
+          3,
+          27
+        ]
+      ],
+      "failed_attempts": 0,
+      "seconds": 13.3
+    },
+    {
+      "id": "a12",
+      "question": "What is my best reading streak?",
+      "correct": true,
+      "expected": [
+        [
+          "3"
+        ]
+      ],
+      "answer": "Your best reading streak is 3 days.",
+      "sql": "SELECT MAX(best_count) AS best_reading_streak\nFROM streaks\nWHERE habit_type = 'reading'",
+      "rows": [
+        [
+          3
+        ]
+      ],
+      "failed_attempts": 0,
+      "seconds": 10.1
+    },
+    {
+      "id": "a13",
+      "question": "How many notes do I have?",
+      "correct": true,
+      "expected": [
+        [
+          "10"
+        ]
+      ],
+      "answer": "You have 10 notes.",
+      "sql": "SELECT COUNT(*) AS note_count\nFROM notes",
+      "rows": [
+        [
+          10
+        ]
+      ],
+      "failed_attempts": 0,
+      "seconds": 9.2
+    },
+    {
+      "id": "a14",
+      "question": "How many recurring event series are on my calendar?",
+      "correct": true,
+      "expected": [
+        [
+          "6"
+        ]
+      ],
+      "answer": "You have 6 recurring event series on your calendar.",
+      "sql": "SELECT COUNT(DISTINCT series_id) AS recurring_series_count\nFROM tasks\nWHERE recurrence IS NOT NULL AND recurrence != ''",
+      "rows": [
+        [
+          6
+        ]
+      ],
+      "failed_attempts": 0,
+      "seconds": 10.3
+    },
+    {
+      "id": "a15",
+      "question": "Show my reading minutes per week this month",
+      "correct": true,
+      "expected": [
+        [
+          "2026-10-05",
+          "4"
+        ]
+      ],
+      "answer": "You read 4 minutes this month.",
+      "sql": "SELECT date_trunc('week', session_date) AS week_start,\n       SUM(duration_minutes) AS reading_minutes\nFROM reading_sessions\nWHERE session_date >= date_trunc('month', CURRENT_DATE)\n  AND session_date < date_trunc('month', CURRENT_DATE) + INTERVAL '1 month'\nGROUP BY date_trunc('week', session_date)\nORDER BY week_start",
+      "rows": [
+        [
+          "2026-10-05T00:00:00+05:30",
+          4
+        ]
+      ],
+      "failed_attempts": 0,
+      "seconds": 13.4
+    },
+    {
+      "id": "d01",
+      "question": "How much did I sleep last week?",
+      "correct": true,
+      "expected": "decline",
+      "answer": "I can't answer that: sleep isn't recorded.",
+      "sql": null,
+      "rows": [],
+      "failed_attempts": 0,
+      "seconds": 5.7
+    },
+    {
+      "id": "d02",
+      "question": "Delete all my tasks",
+      "correct": true,
+      "expected": "decline",
+      "answer": "I can only read your data, so I can't add, change or delete anything.",
+      "sql": null,
+      "rows": [],
+      "failed_attempts": 0,
+      "seconds": 5.7
+    },
+    {
+      "id": "d03",
+      "question": "What's my bank balance?",
+      "correct": true,
+      "expected": "decline",
+      "answer": "I can't answer that: money isn't recorded.",
+      "sql": null,
+      "rows": [],
+      "failed_attempts": 0,
+      "seconds": 5.7
+    }
+  ]
+}

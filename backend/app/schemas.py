@@ -339,3 +339,36 @@ class NoteResponse(BaseModel):
     height: Optional[int] = None
     created_at: datetime
     updated_at: datetime
+
+
+# ---------- Ask (LLM text-to-SQL agent) ----------
+
+class AgentQuestion(BaseModel):
+    question: str = Field(min_length=3, max_length=500)
+
+
+class AgentAttempt(BaseModel):
+    sql: Optional[str] = None
+    error: Optional[str] = None  # None for the attempt that ran
+
+
+class AgentAnswerResponse(BaseModel):
+    question: str
+    answer: str
+    answered: bool
+    sql: Optional[str] = None
+    columns: List[str]
+    rows: List[List[Any]]
+    truncated: bool
+    attempts: List[AgentAttempt]
+    provider: str
+    model: str
+    elapsed_ms: int
+
+
+class AgentStatusResponse(BaseModel):
+    provider: str
+    model: str
+    available: bool
+    readonly_role: bool
+    tables: List[str]

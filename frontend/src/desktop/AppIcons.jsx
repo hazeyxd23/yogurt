@@ -191,3 +191,44 @@ export function StickiesIcon({ className }) {
     </svg>
   );
 }
+
+export function AskIcon({ className }) {
+  const i = useIds("can", "top", "bubble", "gloss", "shadow");
+  return (
+    <svg viewBox="0 0 128 128" className={className}>
+      <defs>
+        <linearGradient id={i.can} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#8f98a3" />
+          <stop offset="0.35" stopColor="#f4f6f8" />
+          <stop offset="0.7" stopColor="#c3c9d0" />
+          <stop offset="1" stopColor="#7d8691" />
+        </linearGradient>
+        <linearGradient id={i.top} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#ffffff" />
+          <stop offset="1" stopColor="#c9ced5" />
+        </linearGradient>
+        <linearGradient id={i.bubble} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#36a2ff" />
+          <stop offset="1" stopColor="#0a7cff" />
+        </linearGradient>
+        <linearGradient id={i.gloss} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#fff" stopOpacity="0.55" />
+          <stop offset="1" stopColor="#fff" stopOpacity="0" />
+        </linearGradient>
+        <Shadow id={i.shadow} />
+      </defs>
+      {/* a database: three stacked discs */}
+      <g filter={`url(#${i.shadow})`}>
+        <path d="M14 46v50c0 8 17 15 38 15s38-7 38-15V46" fill={`url(#${i.can})`} stroke="#5f6873" strokeWidth="1.5" />
+        <path d="M14 63c0 8 17 15 38 15s38-7 38-15M14 80c0 8 17 15 38 15s38-7 38-15" fill="none" stroke="#6d7680" strokeWidth="1.5" />
+        <ellipse cx="52" cy="46" rx="38" ry="15" fill={`url(#${i.top})`} stroke="#5f6873" strokeWidth="1.5" />
+      </g>
+      {/* an iMessage-style question bubble */}
+      <g filter={`url(#${i.shadow})`}>
+        <path d="M74 14h28a20 20 0 0 1 0 40h-6c-1 6 1 12 6 16-8 0-14-3-18-8a20 20 0 0 1-10-48z" fill={`url(#${i.bubble})`} />
+        <path d="M76 17h25a17 17 0 0 1 15 9H63a17 17 0 0 1 13-9z" fill={`url(#${i.gloss})`} />
+        <text x="89" y="35" textAnchor="middle" dominantBaseline="central" fontFamily="-apple-system, 'Helvetica Neue', Arial, sans-serif" fontSize="30" fontWeight="700" fill="#fff">?</text>
+      </g>
+    </svg>
+  );
+}

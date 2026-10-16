@@ -4,7 +4,8 @@ import ReadingPage from "../pages/ReadingPage";
 import LeetcodePage from "../pages/LeetcodePage";
 import TasksPage from "../pages/TasksPage";
 import NotesPage from "../pages/NotesPage";
-import { BookAppIcon, CalendarIcon, DashboardIcon, GuitarAppIcon, StickiesIcon, TerminalIcon } from "./AppIcons";
+import AskPage from "../pages/AskPage";
+import { AskIcon, BookAppIcon, CalendarIcon, DashboardIcon, GuitarAppIcon, StickiesIcon, TerminalIcon } from "./AppIcons";
 
 // Every section of the site is an "application" with its own window.
 // `fill` apps manage their own scrolling and want the full window body.
@@ -15,6 +16,7 @@ export const APPS = [
   { id: "leetcode", title: "LeetCode Daily", short: "LeetCode", path: "/leetcode", Icon: TerminalIcon, Component: LeetcodePage, size: [1000, 720] },
   { id: "tasks", title: "Calendar", path: "/tasks", Icon: CalendarIcon, Component: TasksPage, size: [1240, 760], fill: true },
   { id: "notes", title: "Notes", path: "/notes", Icon: StickiesIcon, Component: NotesPage, size: [1200, 740], fill: true },
+  { id: "ask", title: "Ask", path: "/ask", Icon: AskIcon, Component: AskPage, size: [780, 700], fill: true },
 ];
 
 export const appById = Object.fromEntries(APPS.map((a) => [a.id, a]));

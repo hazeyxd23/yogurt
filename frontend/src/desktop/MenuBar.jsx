@@ -63,7 +63,7 @@ export default function MenuBar() {
     };
   }, [menu]);
 
-  // Alt+1..6 jumps to an app
+  // Alt+1..N jumps to the Nth app
   useEffect(() => {
     const onKey = (e) => {
       if (!e.altKey || e.ctrlKey || e.metaKey) return;

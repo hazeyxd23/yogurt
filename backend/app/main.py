@@ -8,7 +8,7 @@ from app.database import Base, SessionLocal, engine
 from app.middleware.performance import PerformanceMiddleware
 from app.models import User
 from app.utils.migrations import ensure_columns
-from app.routes import analytics, guitar, integrations, leetcode, notes, notifications, reading, tasks
+from app.routes import agent, analytics, guitar, integrations, leetcode, notes, notifications, reading, tasks
 
 DEFAULT_USER_ID = 1
 DEFAULT_USER_EMAIL = "user@example.com"
@@ -33,6 +33,7 @@ app.include_router(analytics.router)
 app.include_router(notifications.router)
 app.include_router(integrations.router)
 app.include_router(notes.router)
+app.include_router(agent.router)
 
 
 def _seed_default_user() -> None:

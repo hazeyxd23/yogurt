@@ -8,6 +8,7 @@ A single-user productivity web app with a Mac OS X Aqua-style desktop interface.
 
 - **Backend:** FastAPI, SQLAlchemy 2, PostgreSQL, with optional Redis caching and Celery jobs.
 - **Frontend:** React 18, Vite and Tailwind CSS.
+- **LLM agent:** the Ask app answers plain-English questions about the data with a text-to-SQL agent (a local Ollama model or the OpenAI API), running every query read-only.
 
 ![Desktop](docs/screenshots/desktop.png)
 
@@ -28,7 +29,7 @@ A single-user productivity web app with a Mac OS X Aqua-style desktop interface.
 
 - Apps open as windows with traffic-light controls, title-bar dragging, a resize grip and a genie-style minimise.
 - **Dock:** launches apps, magnifies icons on hover, bounces on launch and lights up under running apps.
-- **Menu bar:** File, View, Go, Window and Help menus. `Alt+1` to `Alt+6` jump straight to an app.
+- **Menu bar:** File, View, Go, Window and Help menus. `Alt+1` to `Alt+7` jump straight to an app.
 - **URL routing:** the URL follows the front window (`/notes`, `/tasks`, `/guitar`, and so on). `/desktop` shows the empty desktop.
 - **Dark mode:** follows the OS by default. It can also be toggled from the View menu or the menu-bar switch; the choice is stored in `localStorage` as `yogurt.theme`.
 - **Theming:** colours are CSS variables consumed by Tailwind (`rgb(var(--c-…) / <alpha-value>)`), and dark mode swaps them under `html.dark`.
@@ -129,11 +130,40 @@ The dashboard shows streaks for each activity, today's tasks, a weekly minutes c
 
 ![Dashboard](docs/screenshots/dashboard.png)
 
+### Ask (LLM text-to-SQL agent)
+
+Ask questions such as "Which book have I spent the most time reading?" or "How many high-priority tasks do I have this week?". The answer shows the SQL that ran and its result rows.
+
+![Ask](docs/screenshots/ask.png)
+
+**How a question is answered** (`backend/app/agent/`):
+
+1. **Schema-aware prompt.** The model sees only the habit tables, as compact DDL generated from the SQLAlchemy models, plus notes on what coded columns mean (`priority` 1 = high, book `status` values, and so on). It also gets today's date for relative dates and two worked examples that fix the reply format.
+2. **Static check** (`guard.py`). The SQL must be one `SELECT`/`WITH` statement over the allowed tables. Anything that writes, touches another table or the system catalogs, or calls functions such as `dblink` or `set_config` is rejected before it runs.
+3. **Read-only execution** (`db.py`). The query runs in a `READ ONLY` transaction with a statement timeout and a row cap, and the transaction is always rolled back. It runs as the `yogurt_agent` Postgres role, which can only `SELECT` the habit tables (see [Read-only role](#read-only-role)).
+4. **Self-correction.** If the check rejects a query or Postgres returns an error, that message goes back to the model to fix the query, up to 3 attempts. Postgres errors keep their `LINE n` and `^` position, and a repeated failing query is flagged instead of re-run.
+5. **Written answer.** A second call turns the result rows into a one-to-three sentence answer.
+
+The agent declines questions the data doesn't cover (sleep, money and so on) and requests to change data, without running a query.
+
+The four layers are independent: a query that slipped past the static check would still hit the read-only transaction, and the role can't read `users` or `integrations` at all.
+
+**Evaluation** (`backend/eval/`): 18 questions with ground-truth SQL. Fifteen are answerable, covering counts, averages, joins, date ranges, weekly grouping and argmax. Three should be declined: sleep, a bank balance, and "delete all my tasks". An answer counts as correct when every value of the ground-truth result appears in the agent's rows. Ground truth runs live against the sample data.
+
+| Model | Answerable correct | Correct on first query | Declines correct | Avg time |
+| --- | --- | --- | --- | --- |
+| `qwen3.5:4b` (Ollama, 8 GB GPU) | 15/15 | 15/15 | 3/3 | 10.1 s |
+
+This is a small set on a small dataset, so it shows the agent works across the main query shapes; it is not a benchmark. During development, before the worked examples were added, the same model often returned prose instead of SQL. The error feedback is what lets it recover from syntax errors such as `ROUND(SUM(x) AS y)`.
+
 ## Architecture
 
 ```
 frontend (Vite, :3000)  --axios-->  FastAPI (:8000)  -->  PostgreSQL
-                                        |
+                                        |                     ^
+                                        |                     | SELECT-only role, READ ONLY transactions
+                                        +--> Ask agent -------+
+                                        |       +--> Ollama (local) or OpenAI API
                                         +--> Redis (optional): response cache, Celery broker
                                         +--> Celery worker + beat: daily aggregation, email digests
 ```
@@ -174,6 +204,7 @@ Interactive docs are served at `http://localhost:8000/docs` when the backend is 
 | `/analytics` | `today`, `weekly`, `monthly`, `summary`, `streaks`, `trends`, `predictions`, `comparison`, `anomalies`, `peak-hours`, `heatmap`, `export` |
 | `/notifications` | `GET /`, `POST /{id}/read`, `PUT /preferences`, `POST /test`, `GET /digest` |
 | `/integrations` | GitHub and Goodreads `connect` / `sync` / `stats` |
+| `/agent` | `POST /ask` `{"question": ...}` returns the answer, SQL, columns, rows and every attempt; `GET /status` returns the provider, model, reachability and whether the read-only role is in use |
 | `/health` | Status and cache connectivity |
 
 ## Getting started
@@ -197,6 +228,34 @@ uvicorn app.main:app --reload --port 8000
 ```
 
 The database named in `DATABASE_URL` must exist. Tables are created on first start.
+
+### Ask agent
+
+By default the agent uses a local [Ollama](https://ollama.com) model:
+
+```bash
+ollama pull qwen3.5:4b
+```
+
+To use OpenAI instead, set `LLM_PROVIDER=openai` and `OPENAI_API_KEY` in `backend/.env`.
+
+### Read-only role
+
+```bash
+cd backend
+.venv/Scripts/python.exe scripts/create_agent_role.py
+```
+
+This creates the `yogurt_agent` role with a random password, `SELECT` on the habit tables only, and read-only transactions by default. It then writes `AGENT_DATABASE_URL` to `backend/.env`. Without it, the agent falls back to `DATABASE_URL`, still inside a read-only transaction.
+
+### Tests and evaluation
+
+```bash
+cd backend
+pip install -r requirements-dev.txt
+pytest                                      # guard and agent loop, no model or database needed
+.venv/Scripts/python.exe -m eval.run_agent_eval   # live run against the model and database
+```
 
 ### Frontend
 
@@ -227,6 +286,13 @@ Backend settings are read from `backend/.env` (see `backend/.env.example`):
 | `CELERY_RESULT_BACKEND` | `redis://localhost:6379/1` | Celery results |
 | `SENDGRID_API_KEY` | unset | Enables email digests |
 | `SENDGRID_FROM_EMAIL` | `noreply@productivity-analytics.app` | Sender address |
+| `LLM_PROVIDER` | `ollama` | `ollama` or `openai` |
+| `OLLAMA_BASE_URL` / `OLLAMA_MODEL` | `http://localhost:11434` / `qwen3.5:4b` | Local model |
+| `OPENAI_API_KEY` / `OPENAI_MODEL` | unset / `gpt-4o-mini` | OpenAI model |
+| `AGENT_DATABASE_URL` | unset (falls back to `DATABASE_URL`) | Connection for agent queries; set by `create_agent_role.py` |
+| `AGENT_MAX_ATTEMPTS` | `3` | Query attempts per question |
+| `AGENT_ROW_LIMIT` | `200` | Rows returned per query |
+| `AGENT_STATEMENT_TIMEOUT_MS` | `5000` | Per-query time limit |
 | `LOG_LEVEL` | `INFO` | Logging level |
 
 The frontend reads `VITE_API_URL` from `frontend/.env`. It defaults to `http://localhost:8000`.
@@ -270,13 +336,16 @@ backend/
     main.py            FastAPI app, startup (create_all, ensure_columns, default user)
     models.py          SQLAlchemy models
     schemas.py         Pydantic schemas
-    routes/            notes, tasks, guitar, reading, leetcode, analytics, notifications, integrations
+    routes/            notes, tasks, guitar, reading, leetcode, analytics, notifications, integrations, agent
+    agent/             text-to-SQL agent: schema prompt, SQL guard, read-only runner, LLM clients, loop
     utils/             migrations, analytics engine, query helpers
     services/          email and notification services
     middleware/        request timing
     cache.py           Redis cache with graceful fallback
     tasks.py           Celery app and scheduled jobs
-  scripts/showcase_data.py
+  scripts/             showcase_data.py, create_agent_role.py
+  tests/               pytest: SQL guard and agent loop
+  eval/                agent questions with ground-truth SQL, run_agent_eval.py, results/
 frontend/
   src/
     desktop/           window manager, windows, Dock, menu bar, app registry, icons, logo

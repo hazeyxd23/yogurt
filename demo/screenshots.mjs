@@ -71,6 +71,13 @@ await app("reading", "/reading", "light", async (p) => {
   await sleep(1500);
 });
 await app("guitar", "/guitar");
+await app("ask", "/ask", "light", async (p) => {
+  await p.locator(`${win("ask")} input`).fill("Which book have I spent the most time reading?");
+  await p.locator(`${win("ask")} button[type=submit]`).click();
+  await p.locator(`${win("ask")} summary`, { hasText: "SQL" }).waitFor({ timeout: 120000 });
+  await p.locator(`${win("ask")} summary`, { hasText: "SQL" }).click();
+  await sleep(600);
+});
 await app("dark", "/desktop", "dark", async (p) => {
   await desktop(["dashboard", "notes"])(p);
   await openNote(p, "Two Pointer Patterns");

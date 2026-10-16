@@ -199,3 +199,13 @@ export function updateTaskScoped(id, updates, scope = "this") {
 export function deleteTaskScoped(id, scope = "this") {
   return request({ method: "delete", url: `/tasks/${id}`, params: { scope } });
 }
+
+// ---------- Ask (LLM text-to-SQL agent) ----------
+
+export function askAgent(question, signal) {
+  return request({ method: "post", url: "/agent/ask", data: { question }, signal, timeout: 300000 });
+}
+
+export function getAgentStatus(signal) {
+  return request({ method: "get", url: "/agent/status", signal });
+}

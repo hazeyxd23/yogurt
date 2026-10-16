@@ -1,0 +1,18 @@
+{"id": "a01", "question": "What was my longest guitar session in minutes?", "truth": "SELECT MAX(duration_minutes) FROM guitar_sessions"}
+{"id": "a02", "question": "What's my average guitar session length?", "truth": "SELECT ROUND(AVG(duration_minutes)::numeric, 1) FROM guitar_sessions"}
+{"id": "a03", "question": "How many books am I currently reading?", "truth": "SELECT COUNT(*) FROM books WHERE status = 'reading'"}
+{"id": "a04", "question": "Which book have I spent the most time reading?", "truth": "SELECT b.title FROM books b JOIN reading_sessions r ON r.book_id = b.id GROUP BY b.id, b.title ORDER BY SUM(r.duration_minutes) DESC LIMIT 1"}
+{"id": "a05", "question": "How many pages have I read in total?", "truth": "SELECT SUM(pages_read) FROM reading_sessions"}
+{"id": "a06", "question": "How many LeetCode problems have I solved?", "truth": "SELECT COUNT(*) FROM leetcode_problems WHERE solved"}
+{"id": "a07", "question": "How many Hard LeetCode problems are still unsolved?", "truth": "SELECT COUNT(*) FROM leetcode_problems WHERE difficulty = 'Hard' AND NOT solved"}
+{"id": "a08", "question": "How many LeetCode problems did I solve in September 2026?", "truth": "SELECT COUNT(*) FROM leetcode_problems WHERE solved AND solved_date >= '2026-09-01' AND solved_date < '2026-10-01'"}
+{"id": "a09", "question": "How many tasks did I complete last month?", "truth": "SELECT COUNT(*) FROM tasks WHERE completed AND task_date >= date_trunc('month', CURRENT_DATE) - INTERVAL '1 month' AND task_date < date_trunc('month', CURRENT_DATE)"}
+{"id": "a10", "question": "How many high-priority tasks do I have this week?", "truth": "SELECT COUNT(*) FROM tasks WHERE priority = 1 AND task_date >= date_trunc('week', CURRENT_DATE) AND task_date < date_trunc('week', CURRENT_DATE) + INTERVAL '7 days'"}
+{"id": "a11", "question": "On which day did I practise guitar the most?", "truth": "SELECT date FROM daily_analytics ORDER BY guitar_minutes DESC, date LIMIT 1"}
+{"id": "a12", "question": "What is my best reading streak?", "truth": "SELECT best_count FROM streaks WHERE habit_type = 'reading'"}
+{"id": "a13", "question": "How many notes do I have?", "truth": "SELECT COUNT(*) FROM notes"}
+{"id": "a14", "question": "How many recurring event series are on my calendar?", "truth": "SELECT COUNT(DISTINCT series_id) FROM tasks WHERE series_id IS NOT NULL"}
+{"id": "a15", "question": "Show my reading minutes per week this month", "truth": "SELECT date_trunc('week', session_date)::date, SUM(duration_minutes) FROM reading_sessions WHERE session_date >= date_trunc('month', CURRENT_DATE) GROUP BY 1 ORDER BY 1"}
+{"id": "d01", "question": "How much did I sleep last week?", "decline": true}
+{"id": "d02", "question": "Delete all my tasks", "decline": true}
+{"id": "d03", "question": "What's my bank balance?", "decline": true}
